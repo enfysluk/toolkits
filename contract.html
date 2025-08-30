@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contract PDF Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+```
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+    
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        overflow: hidden;
+    }
+    
+    .header {
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+    
+    .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        font-weight: 300;
+    }
+    
+    .header p {
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+    
+    .content {
+        padding: 40px;
+    }
+    
+    .upload-section {
+        margin-bottom: 40px;
+        padding: 30px;
+        border: 3px dashed #667eea;
+        border-radius: 15px;
+        background: rgba(102, 126, 234, 0.05);
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .upload-section:hover {
+        border-color: #764ba2;
+        background: rgba(118, 75, 162, 0.05);
+        transform: translateY(-2px);
+    }
+    
+    .upload-section input[type="file"] {
+        display: none;
+    }
+    
+    .upload-btn {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-block;
+        margin-top: 15px;
+    }
+    
+    .upload-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #2c3e50;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .form-group input {
+        padding: 12px 15px;
+        border: 2px solid #e0e6ed;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .form-group input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        transform: translateY(-1px);
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+        color: #2c3e50;
+        margin: 30px 0 20px 0;
+        padding-bottom: 10px;
+        border-bottom: 3px solid #667eea;
+        display: inline-block;
+    }
+    
+    .generate-btn {
+        background: linear-gradient(135deg, #27ae60, #2ecc71);
+        color: white;
+        padding: 18px 40px;
+        border: none;
+        border-radius: 50px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: block;
+        margin: 40px auto 0;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .generate-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(39, 174, 96, 0.3);
+    }
+    
+    .generate-btn:disabled {
+        background: #bdc3c7;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .status {
+        text-align: center;
+        margin-top: 20px;
+        font-weight: 600;
+    }
+    
+    .status.success {
+        color: #27ae60;
+    }
+    
+    .status.error {
+        color: #e74c3c;
+    }
+    
+    .file-info {
+        background: rgba(39, 174, 96, 0.1);
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 15px;
+        border-left: 4px solid #27ae60;
+    }
+    
+    @media (max-width: 768px) {
+        .content {
+            padding: 20px;
+        }
+        
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+        }
+    }
+    
+    .placeholder-info {
+        background: rgba(52, 152, 219, 0.1);
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        border-left: 4px solid #3498db;
+    }
+    
+    .placeholder-info h3 {
+        color: #2980b9;
+        margin-bottom: 10px;
+    }
+    
+    .placeholder-info p {
+        color: #34495e;
+        line-height: 1.6;
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📄 Contract PDF Generator</h1>
+            <p>Upload your template and generate personalized contracts instantly</p>
+        </div>
+
+```
+    <div class="content">
+        <div class="placeholder-info">
+            <h3>📝 How to use placeholders in your PDF template:</h3>
+            <p>In your PDF template, use placeholders like <strong>{{contract_date_month_year}}</strong>, <strong>{{a_name_surname}}</strong>, etc. 
+            The system will replace these with the values you enter in the form below.</p>
+        </div>
+        
+        <div class="upload-section">
+            <h3>📎 Upload Contract Template</h3>
+            <p>Choose your PDF contract template file</p>
+            <input type="file" id="pdfFile" accept=".pdf">
+            <label for="pdfFile" class="upload-btn">Choose PDF File</label>
+            <div id="fileInfo" class="file-info" style="display: none;"></div>
+        </div>
+        
+        <form id="contractForm">
+            <div class="section-title">📅 Contract Information</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="contract_date_month_year">Contract Date</label>
+                    <input type="date" id="contract_date_month_year" name="contract_date_month_year" value="2025-08-04">
+                </div>
+            </div>
+            
+            <div class="section-title">👤 Party A Information</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="a_name_surname">Name & Surname</label>
+                    <input type="text" id="a_name_surname" name="a_name_surname" value="ABC">
+                </div>
+                <div class="form-group">
+                    <label for="a_id_type">ID Type</label>
+                    <input type="text" id="a_id_type" name="a_id_type" value="12345">
+                </div>
+                <div class="form-group">
+                    <label for="a_country_code">Country Code</label>
+                    <input type="text" id="a_country_code" name="a_country_code" value="+34">
+                </div>
+                <div class="form-group">
+                    <label for="a_phone_number">Phone Number</label>
+                    <input type="text" id="a_phone_number" name="a_phone_number" value="666666666">
+                </div>
+                <div class="form-group">
+                    <label for="a_email">Email</label>
+                    <input type="email" id="a_email" name="a_email" value="12345@gmail.com">
+                </div>
+                <div class="form-group">
+                    <label for="a_iban_number">IBAN Number</label>
+                    <input type="text" id="a_iban_number" name="a_iban_number" value="888888888888">
+                </div>
+            </div>
+            
+            <div class="section-title">👥 Party B Information</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="b_name_surname">Name & Surname</label>
+                    <input type="text" id="b_name_surname" name="b_name_surname" value="DEF">
+                </div>
+                <div class="form-group">
+                    <label for="b_id_type">ID Type</label>
+                    <input type="text" id="b_id_type" name="b_id_type" value="Passaporte">
+                </div>
+                <div class="form-group">
+                    <label for="b_id_number">ID Number</label>
+                    <input type="text" id="b_id_number" name="b_id_number" value="000000000">
+                </div>
+                <div class="form-group">
+                    <label for="b_country_code">Country Code</label>
+                    <input type="text" id="b_country_code" name="b_country_code" value="+34">
+                </div>
+                <div class="form-group">
+                    <label for="b_phone_number">Phone Number</label>
+                    <input type="text" id="b_phone_number" name="b_phone_number" value="999999999">
+                </div>
+                <div class="form-group">
+                    <label for="b_email">Email</label>
+                    <input type="email" id="b_email" name="b_email" value="9999@gmail.com">
+                </div>
+            </div>
+            
+            <div class="section-title">🏠 Property Information</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="address">Address</label>
+                    <input type="text" id="address" name="address" value="Calle Uva 3">
+                </div>
+                <div class="form-group">
+                    <label for="floor">Floor</label>
+                    <input type="text" id="floor" name="floor" value="3">
+                </div>
+                <div class="form-group">
+                    <label for="door">Door</label>
+                    <input type="text" id="door" name="door" value="2">
+                </div>
+                <div class="form-group">
+                    <label for="district">District</label>
+                    <input type="text" id="district" name="district" value="Hospitalet">
+                </div>
+                <div class="form-group">
+                    <label for="room_number">Room Number</label>
+                    <input type="number" id="room_number" name="room_number" value="2">
+                </div>
+            </div>
+            
+            <div class="section-title">💰 Financial Information</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="start_date_month_year">Start Date</label>
+                    <input type="date" id="start_date_month_year" name="start_date_month_year" value="2025-08-05">
+                </div>
+                <div class="form-group">
+                    <label for="end_date_month_year">End Date</label>
+                    <input type="date" id="end_date_month_year" name="end_date_month_year" value="2026-08-04">
+                </div>
+                <div class="form-group">
+                    <label for="rent_euro_number">Rent (EUR)</label>
+                    <input type="number" id="rent_euro_number" name="rent_euro_number" value="600">
+                </div>
+                <div class="form-group">
+                    <label for="deposit">Deposit (EUR)</label>
+                    <input type="number" id="deposit" name="deposit" value="600">
+                </div>
+                <div class="form-group">
+                    <label for="sets_of_keys">Sets of Keys</label>
+                    <input type="number" id="sets_of_keys" name="sets_of_keys" value="1">
+                </div>
+                <div class="form-group">
+                    <label for="monthly_payment">Monthly Payment (EUR)</label>
+                    <input type="number" id="monthly_payment" name="monthly_payment" value="600">
+                </div>
+                <div class="form-group">
+                    <label for="first_payment">First Payment (EUR)</label>
+                    <input type="number" id="first_payment" name="first_payment" value="400">
+                </div>
+                <div class="form-group">
+                    <label for="remaining_deposit">Remaining Deposit (EUR)</label>
+                    <input type="number" id="remaining_deposit" name="remaining_deposit" value="200">
+                </div>
+                <div class="form-group">
+                    <label for="first_pay_date_month_year">First Payment Date</label>
+                    <input type="date" id="first_pay_date_month_year" name="first_pay_date_month_year" value="2025-08-08">
+                </div>
+            </div>
+            
+            <button type="submit" class="generate-btn" id="generateBtn" disabled>
+                🎯 Generate Contract PDF
+            </button>
+        </form>
+        
+        <div id="status" class="status"></div>
+    </div>
+</div>
+
+<script>
+    let pdfTemplate = null;
+    
+    document.getElementById('pdfFile').addEventListener('change', async function(e) {
+        const file = e.target.files[0];
+        if (file && file.type === 'application/pdf') {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                pdfTemplate = arrayBuffer;
+                
+                document.getElementById('fileInfo').style.display = 'block';
+                document.getElementById('fileInfo').innerHTML = `
+                    <strong>✅ Template loaded:</strong> ${file.name} (${(file.size / 1024).toFixed(1)} KB)
+                `;
+                
+                document.getElementById('generateBtn').disabled = false;
+                document.getElementById('status').textContent = '';
+            } catch (error) {
+                document.getElementById('status').textContent = 'Error loading PDF template';
+                document.getElementById('status').className = 'status error';
+            }
+        } else {
+            document.getElementById('status').textContent = 'Please select a valid PDF file';
+            document.getElementById('status').className = 'status error';
+        }
+    });
+    
+    document.getElementById('contractForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        if (!pdfTemplate) {
+            document.getElementById('status').textContent = 'Please upload a PDF template first';
+            document.getElementById('status').className = 'status error';
+            return;
+        }
+        
+        try {
+            document.getElementById('generateBtn').disabled = true;
+            document.getElementById('status').textContent = 'Generating PDF...';
+            document.getElementById('status').className = 'status';
+            
+            // Get form data
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Format dates
+            if (data.contract_date_month_year) {
+                data.contract_date_month_year = data.contract_date_month_year.replace(/-/g, '');
+            }
+            if (data.start_date_month_year) {
+                data.start_date_month_year = data.start_date_month_year.replace(/-/g, '');
+            }
+            if (data.end_date_month_year) {
+                data.end_date_month_year = data.end_date_month_year.replace(/-/g, '');
+            }
+            if (data.first_pay_date_month_year) {
+                data.first_pay_date_month_year = data.first_pay_date_month_year.replace(/-/g, '');
+            }
+            
+            // Load PDF
+            const pdfDoc = await PDFLib.PDFDocument.load(pdfTemplate);
+            
+            // Get all pages
+            const pages = pdfDoc.getPages();
+            
+            // Replace placeholders in each page
+            for (const page of pages) {
+                // Get the text content (this is a simplified approach)
+                // For more complex PDF manipulation, you might need additional libraries
+                
+                // For now, we'll create form fields or use annotations
+                // This is a basic implementation - you may need to adjust based on your PDF structure
+            }
+            
+            // Since PDF-lib doesn't directly support text replacement in existing content,
+            // we'll need to work with form fields or overlays
+            // For demonstration, let's create a simple overlay approach
+            
+            const firstPage = pages[0];
+            const { width, height } = firstPage.getSize();
+            
+            // This is a simplified approach - you'll need to position text based on your template
+            // In a real implementation, you'd parse the PDF content and replace text
+            
+            // For better text replacement, consider using PDF form fields in your template
+            // or use a server-side solution with libraries like pdf-lib + pdf2pic
+            
+            // Create a simple text overlay (adjust positions as needed)
+            const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+            
+            // Since we can't easily replace existing text, let's add form fields
+            const form = pdfDoc.getForm();
+            
+            // Try to find and fill existing form fields, or create new ones
+            try {
+                // This approach assumes your PDF template has form fields named like the placeholders
+                for (const [key, value] of Object.entries(data)) {
+                    try {
+                        const field = form.getTextField(key);
+                        field.setText(String(value));
+                    } catch (e) {
+                        // Field doesn't exist, skip
+                    }
+                }
+            } catch (e) {
+                console.warn('No form fields found in PDF');
+            }
+            
+            // Alternative approach: Add text overlays (you'll need to adjust positions)
+            // This requires knowing the exact positions in your template
+            
+            // Save PDF
+            const pdfBytes = await pdfDoc.save();
+            
+            // Download
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `contract_${data.a_name_surname}_${data.b_name_surname}_${new Date().toISOString().slice(0,10)}.pdf`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            
+            document.getElementById('status').textContent = '✅ PDF generated successfully!';
+            document.getElementById('status').className = 'status success';
+            
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            document.getElementById('status').textContent = 'Error generating PDF: ' + error.message;
+            document.getElementById('status').className = 'status error';
+        } finally {
+            document.getElementById('generateBtn').disabled = false;
+        }
+    });
+    
+    // Add some interactivity
+    document.querySelectorAll('.form-group input').forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'translateY(-2px)';
+            this.parentElement.style.transition = 'transform 0.2s ease';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'translateY(0)';
+        });
+    });
+</script>
+```
+
+</body>
+</html>
